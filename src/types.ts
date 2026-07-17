@@ -10,27 +10,42 @@
 
 export interface IncomeSource {
   id: string;
-  name: string; // e.g. "Spouse 1 salary"
+  name: string; // e.g. "Earner 1 income"
   annualGross: number; // pre-tax annual income
   annualGrowthRate: number; // expected raises, %/yr
 }
 
+/** "single" = one adult; "couple" = two partners/spouses sharing finances. */
+export type HouseholdType = "single" | "couple";
+
 export interface Household {
+  /** Whether the household has one adult or two. Drives which ages apply. */
+  householdType: HouseholdType;
   incomeSources: IncomeSource[];
   /** Blended effective tax rate applied to gross income (federal + state + FICA). */
   effectiveTaxRate: number;
-  /** Ages drive the retirement projection. */
-  spouse1Age: number;
-  spouse2Age: number;
+  /** Primary adult's age. Drives the retirement projection. */
+  primaryAge: number;
+  /** Partner's age; used only when householdType is "couple". */
+  partnerAge: number | null;
   targetRetirementAge: number;
-  /** Dependents, used for college-savings blind-spot analysis. */
+  /** Dependents, used for the college-savings blind-spot analysis. */
   dependents: Dependent[];
 }
+
+/**
+ * A dependent is anyone the household financially supports.
+ *  - "child": a minor the household may need to save for college for.
+ *  - "other": an adult or non-college dependent (elderly parent, disabled
+ *    family member) — excluded from the college-savings check.
+ */
+export type DependentKind = "child" | "other";
 
 export interface Dependent {
   id: string;
   name: string;
   age: number;
+  kind: DependentKind;
 }
 
 // ---------------------------------------------------------------------------

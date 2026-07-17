@@ -29,9 +29,11 @@ The tool is built around five family planning questions:
 
 ## Features
 
-- **Household & income** — two-spouse income sources (add more), per-source
-  growth rates, blended effective tax rate, ages and retirement target,
-  dependents.
+- **Household & income** — single- or two-adult households (a household-type
+  toggle), one or more income sources with per-source growth rates, a blended
+  effective tax rate, ages and retirement target, and dependents (children or
+  other dependents such as elderly parents / disabled family). The starter
+  sample uses generic U.S. national-average figures, not personalized data.
 - **Monthly budget** — categorized spending (groceries, eating out,
   subscriptions, insurance…) with three category types:
   - *Expense* — money leaving the household, optionally CPI-adjusted
