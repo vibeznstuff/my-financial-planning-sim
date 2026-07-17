@@ -32,8 +32,9 @@ export default function HouseholdTab({ plan, setPlan }: TabProps) {
       <div className="card">
         <h2>Income sources</h2>
         <p className="hint">
-          Two salaries for a two-spouse household by default — add more rows for
-          side income you already have. Growth rate models expected raises.
+          Add one row per income stream. A single-earner household can keep just
+          one; a couple can list both. Add more rows for side income you already
+          have. Growth rate models expected raises.
         </p>
         <div className="table-scroll">
           <table className="data">
@@ -141,15 +142,41 @@ export default function HouseholdTab({ plan, setPlan }: TabProps) {
 
       <div className="grid-2">
         <div className="card">
-          <h2>Ages & retirement target</h2>
-          <p className="hint">Used to project your retirement readiness.</p>
+          <h2>Household & retirement target</h2>
+          <p className="hint">
+            Choose whether this is a one- or two-adult household. Ages drive the
+            retirement projection (planned around the older adult in a couple).
+          </p>
           <div className="field-row">
-            <Field label="Spouse 1 age">
-              <NumInput value={hh.spouse1Age} min={18} max={100} onChange={(n) => update({ spouse1Age: n })} />
+            <Field label="Household type">
+              <select
+                value={hh.householdType}
+                aria-label="Household type"
+                onChange={(e) =>
+                  update(
+                    e.target.value === "single"
+                      ? { householdType: "single", partnerAge: null }
+                      : { householdType: "couple", partnerAge: hh.partnerAge ?? hh.primaryAge },
+                  )
+                }
+              >
+                <option value="single">Single (one adult)</option>
+                <option value="couple">Couple (two adults)</option>
+              </select>
             </Field>
-            <Field label="Spouse 2 age">
-              <NumInput value={hh.spouse2Age} min={18} max={100} onChange={(n) => update({ spouse2Age: n })} />
+            <Field label={hh.householdType === "couple" ? "Your age (adult 1)" : "Your age"}>
+              <NumInput value={hh.primaryAge} min={18} max={100} onChange={(n) => update({ primaryAge: n })} />
             </Field>
+            {hh.householdType === "couple" && (
+              <Field label="Partner's age (adult 2)">
+                <NumInput
+                  value={hh.partnerAge ?? hh.primaryAge}
+                  min={18}
+                  max={100}
+                  onChange={(n) => update({ partnerAge: n })}
+                />
+              </Field>
+            )}
             <Field label="Target retirement age">
               <NumInput value={hh.targetRetirementAge} min={30} max={80} onChange={(n) => update({ targetRetirementAge: n })} />
             </Field>
@@ -158,7 +185,14 @@ export default function HouseholdTab({ plan, setPlan }: TabProps) {
 
         <div className="card">
           <h2>Dependents</h2>
-          <p className="hint">Used for the college-savings blind-spot check.</p>
+          <p className="hint">
+            Anyone you financially support — children, elderly parents, or a
+            disabled family member. Mark each as a <strong>Child</strong> (under
+            18, checked for college-savings readiness) or{" "}
+            <strong>Other dependent</strong> (elderly parent, adult, or disabled
+            family — skips the college check). Higher age caps let you record
+            adult dependents.
+          </p>
           {hh.dependents.length === 0 && <div className="empty">No dependents added.</div>}
           <table className="data">
             <tbody>
@@ -177,11 +211,29 @@ export default function HouseholdTab({ plan, setPlan }: TabProps) {
                       }
                     />
                   </td>
+                  <td style={{ width: 150 }}>
+                    <select
+                      value={d.kind}
+                      aria-label="Dependent type"
+                      onChange={(e) =>
+                        update({
+                          dependents: hh.dependents.map((x) =>
+                            x.id === d.id
+                              ? { ...x, kind: e.target.value as "child" | "other" }
+                              : x,
+                          ),
+                        })
+                      }
+                    >
+                      <option value="child">Child</option>
+                      <option value="other">Other dependent</option>
+                    </select>
+                  </td>
                   <td className="num" style={{ width: 90 }}>
                     <NumInput
                       value={d.age}
                       min={0}
-                      max={30}
+                      max={110}
                       aria-label="Dependent age"
                       onChange={(n) =>
                         update({
@@ -211,7 +263,10 @@ export default function HouseholdTab({ plan, setPlan }: TabProps) {
               className="btn"
               onClick={() =>
                 update({
-                  dependents: [...hh.dependents, { id: uid(), name: "Child", age: 0 }],
+                  dependents: [
+                    ...hh.dependents,
+                    { id: uid(), name: "Dependent", age: 0, kind: "child" },
+                  ],
                 })
               }
             >

@@ -12,8 +12,9 @@ function minimalPlan(overrides: Partial<Plan> = {}): Plan {
         { id: "inc1", name: "Job", annualGross: 120000, annualGrowthRate: 0 },
       ],
       effectiveTaxRate: 25,
-      spouse1Age: 35,
-      spouse2Age: 35,
+      householdType: "couple",
+      primaryAge: 35,
+      partnerAge: 35,
       targetRetirementAge: 65,
       dependents: [],
     },
@@ -265,8 +266,8 @@ describe("simulate — default plan sanity", () => {
     expect(result.months).toHaveLength(120);
     expect(result.endNetWorth).toBeGreaterThan(result.startNetWorth);
     expect(result.firstCashCrunchMonth).toBeNull();
-    // Car loan (14k @ 6.9%, $380/mo) pays off inside the horizon.
-    expect(result.payoffs.some((p) => p.name === "Car loan")).toBe(true);
+    // Auto loan (18k @ 7%, $450/mo) pays off inside the horizon.
+    expect(result.payoffs.some((p) => p.name === "Auto loan")).toBe(true);
   });
 });
 

@@ -112,7 +112,12 @@ function retirement(plan: Plan, result: SimulationResult): Insight[] {
   const { household, scenario, budget, assets } = plan;
   const out: Insight[] = [];
 
-  const olderAge = Math.max(household.spouse1Age, household.spouse2Age);
+  // Retirement is planned around the older adult when there are two.
+  const ages =
+    household.householdType === "couple" && household.partnerAge != null
+      ? [household.primaryAge, household.partnerAge]
+      : [household.primaryAge];
+  const olderAge = Math.max(...ages);
   const yearsToRetirement = Math.max(0, household.targetRetirementAge - olderAge);
 
   // Project investment balances to retirement: use simulated end state, then
@@ -213,11 +218,16 @@ function blindSpots(plan: Plan, result: SimulationResult): Insight[] {
   out.push({
     status: monthsCovered >= 6 ? "good" : monthsCovered >= 3 ? "warning" : "critical",
     title: `Emergency fund covers ${monthsCovered.toFixed(1)} months of essentials`,
-    detail: `${fmt(liquidCash)} liquid vs. ${fmt(essentialMonthly)}/mo of essential expenses and debt payments. The common guideline is 3–6 months; dual-income households can lean toward 3–4.`,
+    detail: `${fmt(liquidCash)} liquid vs. ${fmt(essentialMonthly)}/mo of essential expenses and debt payments. The common guideline is 3–6 months; ${
+      household.householdType === "couple"
+        ? "two-income households can lean toward 3–4, since both jobs rarely end at once."
+        : "single-income households should lean toward the higher end (6+), since there's no second paycheck to fall back on."
+    }`,
   });
 
-  // College savings for dependents.
+  // College savings — only for child dependents who haven't reached 18 yet.
   for (const dep of household.dependents) {
+    if (dep.kind === "other") continue;
     const yearsToCollege = Math.max(0, 18 - dep.age);
     const has529 = budget.some(
       (c) =>
@@ -266,7 +276,7 @@ function blindSpots(plan: Plan, result: SimulationResult): Insight[] {
       status: "warning",
       title: "No insurance category found in the budget",
       detail:
-        "A dual-income household with dependents typically carries term life and disability coverage; neither appears in your budget.",
+        "A household with dependents typically carries term life and disability coverage; neither appears in your budget.",
     });
   }
 

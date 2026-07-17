@@ -14,8 +14,8 @@ This is a **family** planning tool, which drove three decisions:
    "Run" button needed.
 3. **Deterministic and inspectable.** The engine models averages (expected
    yield, CPI, growth) rather than stochastic paths. That keeps results
-   explainable to both spouses at the kitchen table: change one number, see
-   one effect. (Monte Carlo is a natural future extension — see below.)
+   explainable at the kitchen table: change one number, see one effect.
+   (Monte Carlo is a natural future extension — see below.)
 
 ## Tech stack
 
@@ -67,8 +67,12 @@ MVP need without any of the security burden of hosting financial data.
 Everything the user enters lives in one versioned, serializable object
 (`src/types.ts`):
 
-- `household` — income sources (each with its own growth rate), a blended
-  effective tax rate, spouse ages, retirement target, dependents.
+- `household` — a household type (`single`/`couple`), income sources (each
+  with its own growth rate), a blended effective tax rate, the primary (and,
+  for couples, partner) age, retirement target, and dependents. Each dependent
+  has a `kind` (`child`/`other`) so the college-savings check applies only to
+  children. The default plan is seeded from generic U.S. national averages so
+  it reflects no real person's finances.
 - `budget` — categories with a `kind` that determines simulation behavior:
   - `expense`: money out; optionally CPI-indexed; flagged essential or
     discretionary (drives the opportunity analysis).
