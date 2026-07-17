@@ -72,6 +72,34 @@ The app opens with a realistic sample plan so every screen is populated —
 replace the numbers with your own, or hit **Reset** to get the sample back.
 Use **Export plan** to save your data as JSON and **Import plan** to restore it.
 
+## Hosting on GitHub Pages
+
+This app is fully static, so it deploys to GitHub Pages with no server. A
+workflow at `.github/workflows/deploy.yml` builds and publishes automatically.
+
+**One-time setup:** in the repo, go to **Settings → Pages → Build and
+deployment → Source** and select **GitHub Actions**.
+
+After that, every push to `main` runs the tests, builds the site, and
+publishes it to:
+
+```
+https://vibeznstuff.github.io/my-financial-planning-sim/
+```
+
+You can also trigger a deploy manually from the **Actions** tab
+("Deploy to GitHub Pages" → "Run workflow").
+
+> **Note on privacy:** GitHub Pages makes the *app code* public, but your
+> financial data never leaves your browser — it's stored in localStorage on
+> your own device, not in the repo or on any server. If you'd rather the app
+> itself stay private, keep the repo private and run it locally with
+> `npm run dev` instead (GitHub Pages on private repos requires a paid plan).
+
+If you fork or rename the repo, the site's sub-path changes. Set it with the
+`BASE_PATH` environment variable at build time, e.g.
+`BASE_PATH=/your-repo-name/ npm run build`.
+
 ## How the simulation works
 
 The engine steps month by month over the chosen horizon. Each month it:
